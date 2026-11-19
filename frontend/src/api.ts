@@ -5,3 +5,4 @@ export function apiFetch(path: string, options?: RequestInit) {
   if (!path.startsWith('/api/')) throw new Error('API pot se mora začeti z /api/.')
   return fetch(`${apiBase}${path.slice(4)}`, { ...options, credentials: 'include' })
 }
+debugger // Intentional CI failure for the branch protection exercise.
