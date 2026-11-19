@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePermissions } from '../../hooks/usePermissions'
@@ -13,7 +14,7 @@ function Avtorji() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/avtorji', { credentials: 'include' })
+    apiFetch('/api/avtorji', { credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new Error('Seznama avtorjev ni bilo mogoče naložiti.')
         return response.json() as Promise<Author[]>

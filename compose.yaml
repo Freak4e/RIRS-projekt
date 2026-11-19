@@ -1,0 +1,19 @@
+name: rirs-projekt
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal_local
+      POSTGRES_DB: uredniski_portal
+    ports:
+      - "127.0.0.1:7777:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal -d uredniski_portal"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  postgres_data:

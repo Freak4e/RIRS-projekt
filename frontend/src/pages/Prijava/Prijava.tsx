@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useState, type SubmitEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import styles from './Prijava.module.css'
@@ -16,7 +17,7 @@ function Prijava() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

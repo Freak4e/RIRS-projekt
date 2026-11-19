@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProjectCompletion from '../../components/ProjectCompletion/ProjectCompletion'
@@ -32,7 +33,7 @@ function Projekti() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/projekti', { credentials: 'include' })
+    apiFetch('/api/projekti', { credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new Error('Seznama projektov ni bilo mogoče naložiti.')
         return response.json() as Promise<Project[]>
@@ -68,7 +69,7 @@ function Projekti() {
           {sortedProjects.map((project) => (
             <Link className={styles.card} key={project.id} to={`/projekti/${project.id}`}>
               <span className={styles.cardTitle}>{project.naslov || 'Brez naslova'}</span>
-              {project.leto_izdaje != null && <span className={styles.year}>{project.leto_izdaje}</span>}
+              {project.leto_izdaje !== null && project.leto_izdaje !== undefined && <span className={styles.year}>{project.leto_izdaje}</span>}
               <ProjectCompletion value={project.izpolnjenost} position="card" />
             </Link>
           ))}

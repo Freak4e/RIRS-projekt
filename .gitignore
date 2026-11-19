@@ -152,3 +152,7 @@ vite.config.ts.timestamp-*
 *.agents/
 *.claude/
 *.windsurf/
+# Generated Prisma client and deployment staging
+backend/src/generated/
+release/
+*.tar.gz

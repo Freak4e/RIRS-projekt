@@ -6,10 +6,11 @@ import {
   registerUser,
 } from '../controllers/authController'
 import { requireAuth } from '../middleware/requireAuth'
+import { requireRoles } from '../middleware/requireRoles'
 
 const authRouter = Router()
 
-authRouter.post('/register', registerUser)
+authRouter.post('/register', requireAuth, requireRoles('ADMIN'), registerUser)
 authRouter.post('/login', loginUser)
 authRouter.get('/me', requireAuth, currentUser)
 authRouter.post('/logout', logoutUser)

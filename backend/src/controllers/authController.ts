@@ -63,7 +63,6 @@ export async function registerUser(req: Request, res: Response) {
     if (body.priimek !== undefined) data.priimek = body.priimek
 
     const user = await postUser(data)
-    setAuthCookie(res, createAuthToken(user.id))
     res.status(201).json(user)
   } catch (error) {
     if (isPrismaErrorCode(error, 'P2002')) {

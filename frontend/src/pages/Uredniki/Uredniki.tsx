@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePermissions } from '../../hooks/usePermissions'
@@ -13,7 +14,7 @@ function Uredniki() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/uredniki', { credentials: 'include' })
+    apiFetch('/api/uredniki', { credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new Error('Seznama urednikov ni bilo mogoče naložiti.')
         return response.json() as Promise<Editor[]>
