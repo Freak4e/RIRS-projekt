@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { usePermissions } from '../../hooks/usePermissions'
@@ -41,7 +42,7 @@ function AvtorPodrobnosti() {
     setLoading(true)
     setError('')
     let active = true
-    fetch(`/api/avtorji/${id}`, { credentials: 'include' })
+    apiFetch(`/api/avtorji/${id}`, { credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new Error(await responseError(response))
         return response.json() as Promise<Author>
@@ -64,7 +65,7 @@ function AvtorPodrobnosti() {
     setError('')
     const payload = Object.fromEntries(Object.entries(form).map(([key, value]) => [key, value === '' ? null : value]))
     try {
-      const response = await fetch(isNew ? '/api/avtorji' : `/api/avtorji/${id}`, {
+      const response = await apiFetch(isNew ? '/api/avtorji' : `/api/avtorji/${id}`, {
         method: isNew ? 'POST' : 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -85,7 +86,7 @@ function AvtorPodrobnosti() {
     setSaving(true)
     setError('')
     try {
-      const response = await fetch(`/api/avtorji/${id}`, { method: 'DELETE', credentials: 'include' })
+      const response = await apiFetch(`/api/avtorji/${id}`, { method: 'DELETE', credentials: 'include' })
       if (!response.ok) throw new Error(await responseError(response))
       navigate('/avtorji', { replace: true })
     } catch (cause) {

@@ -1,3 +1,4 @@
+import { apiFetch } from '../api'
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
@@ -8,7 +9,7 @@ function RequireAuth() {
   useEffect(() => {
     let active = true
 
-    fetch('/api/auth/me', { credentials: 'include' })
+    apiFetch('/api/auth/me', { credentials: 'include' })
       .then((response) => {
         if (active) setIsAuthenticated(response.ok)
       })

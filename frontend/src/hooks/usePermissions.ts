@@ -1,3 +1,4 @@
+import { apiFetch } from '../api'
 import { useEffect, useState } from 'react'
 
 type CurrentUser = { vloge: string[] }
@@ -8,7 +9,7 @@ export function usePermissions() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/auth/me', { credentials: 'include' })
+    apiFetch('/api/auth/me', { credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new Error('Uporabniških pravic ni bilo mogoče prebrati.')
         return response.json() as Promise<CurrentUser>

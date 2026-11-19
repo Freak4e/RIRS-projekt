@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProjectCompletion from '../../components/ProjectCompletion/ProjectCompletion'
@@ -67,12 +68,12 @@ function ProjektPodrobnosti() {
 
   useEffect(() => {
     let active = true
-    const loadAuthors = fetch('/api/avtorji', { credentials: 'include' }).then(async (response) => {
+    const loadAuthors = apiFetch('/api/avtorji', { credentials: 'include' }).then(async (response) => {
       if (!response.ok) throw new Error('Seznama avtorjev ni bilo mogoče naložiti.')
       return response.json() as Promise<Author[]>
     }).then((data) => { if (active) setAuthors(data) })
     const loadEditors = canManage
-      ? fetch('/api/uredniki', { credentials: 'include' }).then(async (response) => {
+      ? apiFetch('/api/uredniki', { credentials: 'include' }).then(async (response) => {
           if (!response.ok) throw new Error('Seznama urednikov ni bilo mogoče naložiti.')
           return response.json() as Promise<Editor[]>
         }).then((data) => { if (active) setEditors(data) })
@@ -92,7 +93,7 @@ function ProjektPodrobnosti() {
     setLoading(true)
     setError('')
     Promise.all([
-      fetch(`/api/projekti/${id}`, { credentials: 'include' }).then(async (response) => {
+      apiFetch(`/api/projekti/${id}`, { credentials: 'include' }).then(async (response) => {
         if (!response.ok) throw new Error(await responseError(response))
         return response.json() as Promise<Project>
       }),
@@ -103,7 +104,7 @@ function ProjektPodrobnosti() {
       const nextFields = { ...emptyScalars }
       for (const key of scalarKeys) {
         const value = project[key]
-        nextFields[key] = value == null ? '' : typeof value === 'boolean' ? String(value) : String(value)
+        nextFields[key] = value === null || value === undefined ? '' : String(value)
       }
       setFields(nextFields)
       const nextAuthors = { ...emptyAuthors }
@@ -152,7 +153,7 @@ function ProjektPodrobnosti() {
     setSaving(true)
     setError('')
     try {
-      const response = await fetch(isNew ? '/api/projekti' : `/api/projekti/${id}`, {
+      const response = await apiFetch(isNew ? '/api/projekti' : `/api/projekti/${id}`, {
         method: isNew ? 'POST' : 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload()),
       })
@@ -169,7 +170,7 @@ function ProjektPodrobnosti() {
     setSaving(true)
     setError('')
     try {
-      const response = await fetch(`/api/projekti/${id}`, { method: 'DELETE', credentials: 'include' })
+      const response = await apiFetch(`/api/projekti/${id}`, { method: 'DELETE', credentials: 'include' })
       if (!response.ok) throw new Error(await responseError(response))
       navigate('/projekti', { replace: true })
     } catch (cause) {

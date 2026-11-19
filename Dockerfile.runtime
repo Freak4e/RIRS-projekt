@@ -1,0 +1,16 @@
+# CI builds both applications before creating this deployment image.
+FROM node:24-bookworm-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY backend/dist ./dist
+COPY backend/prisma ./prisma
+COPY backend/prisma7.config.ts ./prisma7.config.ts
+COPY frontend/dist ./public
+COPY scripts/start-production.sh ./start-production.sh
+ENV NODE_ENV=production
+ENV PORT=3000
+EXPOSE 3000
+USER node
+CMD ["sh", "start-production.sh"]

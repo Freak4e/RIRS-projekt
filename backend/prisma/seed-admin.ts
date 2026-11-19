@@ -4,7 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../src/generated/prisma/client'
 
 const databaseUrl = process.env.DATABASE_URL
-const email = process.env.ADMIN_EMAIL!.trim().toLowerCase()
+const email = process.env.ADMIN_EMAIL?.trim().toLowerCase()
 const password = process.env.ADMIN_PASSWORD
 
 if (!databaseUrl || !email || !password) {

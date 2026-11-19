@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { usePermissions } from '../../hooks/usePermissions'
@@ -33,7 +34,7 @@ function UrednikPodrobnosti() {
     setLoading(true)
     setError('')
     let active = true
-    fetch(`/api/uredniki/${id}`, { credentials: 'include' })
+    apiFetch(`/api/uredniki/${id}`, { credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new Error(await responseError(response))
         return response.json() as Promise<Editor>
@@ -57,7 +58,7 @@ function UrednikPodrobnosti() {
     const { geslo, ...data } = form
     const payload = isNew ? { ...data, geslo } : data
     try {
-      const response = await fetch(isNew ? '/api/uredniki' : `/api/uredniki/${id}`, {
+      const response = await apiFetch(isNew ? '/api/uredniki' : `/api/uredniki/${id}`, {
         method: isNew ? 'POST' : 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

@@ -1,0 +1,162 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24'
+  # Generation and unit tests do not connect to this database.
+  DATABASE_URL: postgresql://portal:ci_only@localhost:5432/portal
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      - run: npm ci --prefix frontend
+      - run: npm ci --prefix backend
+      - run: npm run lint --prefix frontend
+      - run: npm run lint --prefix backend
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      - run: npm ci --prefix frontend
+      - run: npm ci --prefix backend
+      - name: Build frontend with API URL
+        run: npm run build --prefix frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL || '/api' }}
+      - run: npm run build --prefix backend
+      - name: Package production image
+        run: |
+          docker build -f Dockerfile.runtime -t rirs-app:${{ github.sha }} .
+          docker save rirs-app:${{ github.sha }} | gzip > app-image.tar.gz
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: application-build
+          path: |
+            frontend/dist/
+            backend/dist/
+            app-image.tar.gz
+            scripts/deploy-render.mjs
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: portal
+          POSTGRES_PASSWORD: ci_only
+          POSTGRES_DB: portal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portal -d portal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://portal:ci_only@localhost:5432/portal
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      - run: npm ci --prefix frontend
+      - run: npm ci --prefix backend
+      - run: npm run generate --prefix backend
+      - run: npm run db:migrate --prefix backend
+      - name: Frontend tests and coverage
+        id: frontend-tests
+        run: npm run test:coverage --prefix frontend
+      - name: Backend tests and coverage
+        if: ${{ !cancelled() }}
+        run: npm run test:coverage --prefix backend
+      - uses: actions/upload-artifact@v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-reports
+          path: |
+            frontend/coverage/
+            backend/coverage/
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy:
+    name: deploy
+    needs: [lint, build, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    steps:
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: application-build
+          path: release
+      - name: Publish the image from the build artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker load -i release/app-image.tar.gz
+          docker tag "rirs-app:${GITHUB_SHA}" "$IMAGE"
+          docker push "$IMAGE"
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE")
+          echo "IMAGE_URL=$DIGEST" >> "$GITHUB_ENV"
+      - name: Deploy to Render and verify the public application
+        run: node release/scripts/deploy-render.mjs
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          APP_URL: ${{ vars.APP_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}

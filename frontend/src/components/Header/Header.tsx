@@ -1,3 +1,4 @@
+import { apiFetch } from '../../api'
 import styles from './Header.module.css'
 import { NavLink, useNavigate } from 'react-router-dom'
 
@@ -12,7 +13,7 @@ function Header() {
 
   async function handleLogout() {
     try {
-      await fetch('/api/auth/logout', {
+      await apiFetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       })
