@@ -149,7 +149,9 @@ jobs:
           docker tag "rirs-app:${GITHUB_SHA}" "$IMAGE"
           docker push "$IMAGE"
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE")
-          echo "IMAGE_URL=$DIGEST" >> "$GITHUB_ENV"
+          # docker load can retain the original local repository name in RepoDigests.
+          # Keep the immutable digest, but always use the published GHCR repository.
+          echo "IMAGE_URL=${IMAGE%:*}@${DIGEST#*@}" >> "$GITHUB_ENV"
       - name: Deploy to Render and verify the public application
         run: node release/scripts/deploy-render.mjs
         env:

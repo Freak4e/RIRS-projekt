@@ -38,7 +38,23 @@ ki še potrebujejo dostop do gostovanja.
 
 ## Javna namestitev
 
-Workflow za Render je pripravljen. Javna namestitev še ni potrjena: manjkajo
-dostop do uporabnikove storitve, produkcijske skrivnosti in dejanski javni URL.
-Točki 2.5 in povezava v 2.7 sta dokončani šele, ko uspe job `deploy` in je
-preverjena prijava na javnem HTTPS naslovu. Lokalni naslov ni dokaz javne objave.
+- Javni URL: https://rirs-projekt-freak4e.onrender.com.
+- Render storitev `rirs-projekt-freak4e` uporablja že zgrajeno sliko iz GHCR,
+  PostgreSQL 18 `rirs-projekt-db` pa teče v isti regiji Frankfurt.
+- Začetna objava `dep-dbvl0mafngtc73ck90g0` je dosegla stanje `live`.
+- Na javnem HTTPS naslovu so preverjeni frontend in direktna pot `/projekti`,
+  povezava z bazo, prijava in odjava, varen piškotek, zavrnitev javne registracije,
+  ustvarjanje avtorja/urednika/projekta, urednikov dostop samo do dodeljenih
+  projektov, zavrnitev nedovoljene dodelitve in shranjevanje sprememb. Testni
+  zapisi so po preverjanju odstranjeni.
+- GitHub environment `production` vsebuje `RENDER_API_KEY`, `RENDER_SERVICE_ID`,
+  `DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`; variable
+  `APP_URL` vsebuje javni naslov. Repository variable `VITE_API_URL` je `/api`.
+- Pri prvem deployu je bila potrebna dopolnitev produkcijske konfiguracije.
+  Nato je preizkus pokazal, da `docker load` v `RepoDigests` lahko ohrani lokalno
+  ime slike `rirs-app`. Popravek sestavi referenco iz javnega GHCR repozitorija
+  in nespremenjenega SHA256 digesta. Dokončni uspeh samodejnega deploya se
+  preveri v [Actions](https://github.com/Freak4e/RIRS-projekt/actions/workflows/ci-cd.yml).
+- Oba Render vira uporabljata paket Free. Baza poteče **19. 12. 2026**;
+  za poznejšo oddajo je treba zagotoviti veljavno gostovanje baze. Spletna
+  storitev lahko ob prvem obisku po neaktivnosti potrebuje čas za prebujanje.
