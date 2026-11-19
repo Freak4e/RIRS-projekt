@@ -14,6 +14,9 @@ ki še potrebujejo dostop do gostovanja.
   Poročili zajemata tudi nepreizkušene izvorne datoteke; odstotka nista cilj
   popolne pokritosti, temveč izmerjeno stanje osnovnega nabora testov.
 - Produkcijska Docker slika se uspešno zgradi in zažene migracije ter seed.
+- Preverjeni so HTTP 200 za `/api/health`, stran `/projekti`, prijavo in
+  avtenticiran seznam projektov na lokalnem Node zagonu. V Docker sliki so
+  dodatno preverjeni zdravstveni endpoint, stran in prijavni odgovor.
 
 ## GitHub
 
@@ -23,8 +26,15 @@ ki še potrebujejo dostop do gostovanja.
 - `main` zahteva pull request ter uspešne `lint`, `build`, `test`.
 - Zaščita velja tudi za administratorja.
 
-Povezavi do namerno padajoče in popravljene izvedbe bosta dodani po preverjanju
-na GitHubu. Dokler nista zabeleženi, ta del še ni potrjen.
+- [PR #1](https://github.com/Freak4e/RIRS-projekt/pull/1) vsebuje razvojno vejo
+  `feat/ci-cd`, namerno napako in popravek v isti zgodovini.
+- [Namerno padajoča izvedba](https://github.com/Freak4e/RIRS-projekt/actions/runs/44598896752):
+  commit `960a412` vsebuje `debugger` v `frontend/src/api.ts`. `lint` pade,
+  `build` in `test` uspeta, `deploy` je pri PR izpuščen. GitHub poroča
+  `mergeable_state: blocked`; PR ni bil združen.
+- Popravek odstrani namerni `debugger`; [zadnje preverbe PR](https://github.com/Freak4e/RIRS-projekt/pull/1/checks)
+  prikazujejo rezultat popravljenega commita. Točna uspešna izvedba se pred
+  združitvijo preveri tudi na zavihku Actions.
 
 ## Javna namestitev
 
