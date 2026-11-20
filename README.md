@@ -5,8 +5,10 @@
 Uredniški portal za knjižne projekte: React + TypeScript, Express, Prisma in PostgreSQL.
 Fork projekta [ozzvaa/RIRS-projekt](https://github.com/ozzvaa/RIRS-projekt).
 
-**Javna aplikacija:** namestitev na Render še čaka na produkcijsko konfiguracijo.
-Dejanski javni URL bo dodan po uspešnem deployu; trenutno javni zagon ni potrjen.
+**Javna aplikacija:** [MohorjevaManager](https://rirs-projekt-freak4e.onrender.com).
+Frontend, API in PostgreSQL so nameščeni na Renderju. Brezplačna spletna storitev
+po neaktivnosti zaspi; prvi obisk lahko traja približno minuto. Brezplačna baza
+poteče **19. 12. 2026**, zato je za poznejšo uporabo treba urediti nadaljnje gostovanje.
 
 ## Funkcionalnosti
 
